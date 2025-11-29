@@ -11,21 +11,22 @@ public class OptionDao {
 
     // Insert a new option into the database
     public void insert(Option option) throws SQLException {
-        String sql = "INSERT INTO options (question_id, text, is_correct) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO options (question_id, ordinal, text, is_correct) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setLong(1, option.getQuestion_id());
-            ps.setString(2, option.getText());
-            ps.setBoolean(3, option.setIs_correct());
+            ps.setInt(2, option.getOrdinal());  // ← ADDED: Set ordinal
+            ps.setString(3, option.getText());
+            ps.setInt(4, option.getIs_correct());  // ← FIXED: Was setIs_correct(), now getIs_correct()
 
             ps.executeUpdate();
 
             // Get the generated option ID and set it in the object
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
-                    option.setId(rs.getLong(1)); // Set generated ID
+                    option.setId(rs.getLong(1));
                 }
             }
         }
@@ -33,7 +34,7 @@ public class OptionDao {
 
     // Find an option by its ID
     public Option findById(Long id) throws SQLException {
-        String sql = "SELECT id, question_id, text, is_correct FROM options WHERE id = ?";
+        String sql = "SELECT id, question_id, ordinal, text, is_correct FROM options WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -46,12 +47,12 @@ public class OptionDao {
                 }
             }
         }
-        return null; // Return null if no option is found
+        return null;
     }
 
     // Find all options for a specific question
     public List<Option> findByQuestionId(Long questionId) throws SQLException {
-        String sql = "SELECT id, question_id, text, is_correct FROM options WHERE question_id = ?";
+        String sql = "SELECT id, question_id, ordinal, text, is_correct FROM options WHERE question_id = ? ORDER BY ordinal";
 
         List<Option> options = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
@@ -70,15 +71,16 @@ public class OptionDao {
 
     // Update an existing option
     public void update(Option option) throws SQLException {
-        String sql = "UPDATE options SET question_id = ?, text = ?, is_correct = ? WHERE id = ?";
+        String sql = "UPDATE options SET question_id = ?, ordinal = ?, text = ?, is_correct = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setLong(1, option.getQuestion_id());
-            ps.setString(2, option.getText());
-            ps.setBoolean(3, option.setIs_correct());
-            ps.setLong(4, option.getId());
+            ps.setInt(2, option.getOrdinal());  // ← ADDED: Set ordinal
+            ps.setString(3, option.getText());
+            ps.setInt(4, option.getIs_correct());  // ← FIXED: Was setIs_correct(), now getIs_correct()
+            ps.setLong(5, option.getId());
 
             ps.executeUpdate();
         }
@@ -101,8 +103,9 @@ public class OptionDao {
         Option option = new Option();
         option.setId(rs.getLong("id"));
         option.setQuestion_id(rs.getLong("question_id"));
+        option.setOrdinal(rs.getInt("ordinal"));  // ← ADDED: Map ordinal
         option.setText(rs.getString("text"));
-        option.setCorrect(rs.getBoolean("is_correct"));
+        option.setIs_correct(rs.getInt("is_correct"));  // ← FIXED: Use setIs_correct(Integer)
         return option;
     }
 }

@@ -1,17 +1,18 @@
 package com.quickzee.common.model;
 
-import javafx.scene.text.Text;
+import java.util.List;
 
 public class Question {
-    private  Long id;
-
-    public Question() {
-    }
-
-    private  Long quiz_id;
+    private Long id;
+    private Long quiz_id;
     private Integer ordinal;
     private String text;
+    private List<Option> options;  // ← ADDED: For loading question with its options
 
+    // No-arg constructor
+    public Question() {}
+
+    // Constructor without options
     public Question(Long id, Long quiz_id, Integer ordinal, String text) {
         this.id = id;
         this.quiz_id = quiz_id;
@@ -19,6 +20,16 @@ public class Question {
         this.text = text;
     }
 
+    // Full constructor
+    public Question(Long id, Long quiz_id, Integer ordinal, String text, List<Option> options) {
+        this.id = id;
+        this.quiz_id = quiz_id;
+        this.ordinal = ordinal;
+        this.text = text;
+        this.options = options;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -51,13 +62,22 @@ public class Question {
         this.text = text;
     }
 
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<Option> options) {
+        this.options = options;
+    }
+
     @Override
     public String toString() {
         return "Question{" +
                 "id=" + id +
                 ", quiz_id=" + quiz_id +
                 ", ordinal=" + ordinal +
-                ", text=" + text +
+                ", text='" + text + '\'' +
+                ", options=" + (options != null ? options.size() + " options" : "not loaded") +
                 '}';
     }
 }

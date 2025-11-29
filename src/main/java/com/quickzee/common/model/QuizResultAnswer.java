@@ -2,17 +2,22 @@ package com.quickzee.common.model;
 
 public class QuizResultAnswer {
     private Long id;
-    private Long result_id;
-    private Long question_id;
-    private Long selected_option_id;
+    private Long resultId;  // ← FIXED: Changed from result_id
+    private Long questionId;  // ← FIXED: Changed from question_id
+    private Long selectedOptionId;  // ← FIXED: Changed from selected_option_id
 
-    public QuizResultAnswer(Long id, Long result_id, Long question_id, Long selected_option_id) {
+    // No-arg constructor
+    public QuizResultAnswer() {}
+
+    // Full constructor
+    public QuizResultAnswer(Long id, Long resultId, Long questionId, Long selectedOptionId) {
         this.id = id;
-        this.result_id = result_id;
-        this.question_id = question_id;
-        this.selected_option_id = selected_option_id;
+        this.resultId = resultId;
+        this.questionId = questionId;
+        this.selectedOptionId = selectedOptionId;
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -21,38 +26,37 @@ public class QuizResultAnswer {
         this.id = id;
     }
 
-    public Long getResult_id() {
-        return result_id;
+    public Long getResultId() {
+        return resultId;
     }
 
-    public void setResult_id(Long result_id) {
-        this.result_id = result_id;
+    public void setResultId(Long resultId) {
+        this.resultId = resultId;
     }
 
-    public Long getQuestion_id() {
-        return question_id;
+    public Long getQuestionId() {
+        return questionId;
     }
 
-    public void setQuestion_id(Long question_id) {
-        this.question_id = question_id;
+    public void setQuestionId(Long questionId) {
+        this.questionId = questionId;
     }
 
-    public Long getSelected_option_id() {
-        return selected_option_id;
+    public Long getSelectedOptionId() {
+        return selectedOptionId;
     }
 
-    public void setSelected_option_id(Long selected_option_id) {
-        this.selected_option_id = selected_option_id;
+    public void setSelectedOptionId(Long selectedOptionId) {
+        this.selectedOptionId = selectedOptionId;
     }
 
     @Override
     public String toString() {
         return "QuizResultAnswer{" +
                 "id=" + id +
-                ", result_id=" + result_id +
-                ", question_id=" + question_id +
-                ", selected_option_id=" + selected_option_id +
+                ", resultId=" + resultId +
+                ", questionId=" + questionId +
+                ", selectedOptionId=" + selectedOptionId +
                 '}';
     }
 }
-

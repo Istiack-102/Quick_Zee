@@ -3,10 +3,14 @@ package com.quickzee.common.model;
 public class Option {
     private Long id;
     private Long question_id;
-    private  Integer ordinal;
+    private Integer ordinal;
     private String text;
-    private Integer is_correct;
+    private Integer is_correct;  // 0 or 1
 
+    // No-arg constructor ← ADDED
+    public Option() {}
+
+    // Full constructor
     public Option(Long id, Long question_id, Integer ordinal, String text, Integer is_correct) {
         this.id = id;
         this.question_id = question_id;
@@ -15,6 +19,7 @@ public class Option {
         this.is_correct = is_correct;
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -51,8 +56,18 @@ public class Option {
         return is_correct;
     }
 
-    public void setIs_correct() {
+    // FIXED: Added parameter ← BUG FIX
+    public void setIs_correct(Integer is_correct) {
         this.is_correct = is_correct;
+    }
+
+    // Convenience methods for boolean conversion
+    public boolean isCorrect() {
+        return is_correct != null && is_correct == 1;
+    }
+
+    public void setCorrect(boolean correct) {
+        this.is_correct = correct ? 1 : 0;
     }
 
     @Override

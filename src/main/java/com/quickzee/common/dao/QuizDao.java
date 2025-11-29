@@ -142,12 +142,73 @@ public class QuizDao {
                     opt.setQuestion_id(rs.getLong("question_id"));
                     opt.setOrdinal(rs.getInt("ordinal"));
                     opt.setText(rs.getString("text"));
-                    opt.setCorrect(rs.getBoolean("is_correct"));
-
+                    opt.setIs_correct(rs.getInt("is_correct"));
                     options.add(opt);
                 }
             }
         }
         return options;
+    }
+
+// Additional helpful methods for admin functionality
+
+    /**
+     * Insert a new quiz (without questions)
+     */
+    public void insert(Quiz quiz) throws SQLException {
+        String sql = "INSERT INTO quizzes (title, semester, duration_minutes) VALUES (?, ?, ?)";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setString(1, quiz.getTitle());
+            if (quiz.getSemester() != null) {
+                ps.setInt(2, quiz.getSemester());
+            } else {
+                ps.setNull(2, Types.INTEGER);
+            }
+            ps.setInt(3, quiz.getDuration_minutes() != null ? quiz.getDuration_minutes() : 15);
+
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    quiz.setId(rs.getLong(1));
+                }
+            }
+        }
+    }
+
+    /**
+     * Get all quizzes (for admin view)
+     */
+    public List<Quiz> findAll() throws SQLException {
+        String sql = "SELECT id, title, semester, duration_minutes FROM quizzes ORDER BY id DESC";
+
+        List<Quiz> quizzes = new ArrayList<>();
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                quizzes.add(mapRowToQuiz(rs));
+            }
+        }
+        return quizzes;
+    }
+
+    /**
+     * Delete a quiz by ID
+     */
+    public void deleteById(Long id) throws SQLException {
+        String sql = "DELETE FROM quizzes WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            ps.executeUpdate();
+        }
     }
 }

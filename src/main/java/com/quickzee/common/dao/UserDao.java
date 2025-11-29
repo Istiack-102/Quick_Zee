@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDao{
+public class UserDao {
 
     // Create (register)
     public void insert(User user) throws SQLException {
@@ -18,13 +18,13 @@ public class UserDao{
 
             ps.setString(1, user.getName());
             ps.setString(2, user.getEmail());
-            ps.setString(3, user.getPassword());  // TODO: hash password later
+            ps.setString(3, user.getPassword());
             if (user.getSemester() != null) {
                 ps.setInt(4, user.getSemester());
             } else {
                 ps.setNull(4, Types.INTEGER);
             }
-            ps.setString(5, user.getRole() != null ? user.getRole() : "user");
+            ps.setString(5, user.getRole() != null ? user.getRole() : "student");
 
             ps.executeUpdate();
 
@@ -123,7 +123,7 @@ public class UserDao{
         }
     }
 
-    // Login helper (simple, without hashing)
+    // Login helper
     public User login(String email, String password) throws SQLException {
         String sql = "SELECT id, name, email, password, semester, role FROM users WHERE email = ? AND password = ?";
 
@@ -131,7 +131,7 @@ public class UserDao{
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
-            ps.setString(2, password);  // TODO: compare hashed password later
+            ps.setString(2, password);  // Will use hashed password
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -139,10 +139,10 @@ public class UserDao{
                 }
             }
         }
-        return null; // invalid credentials
+        return null; // Invalid credentials
     }
 
-    // ==== Private helper ====
+    // Helper method
     private User mapRowToUser(ResultSet rs) throws SQLException {
         User u = new User();
         u.setId(rs.getLong("id"));

@@ -4,31 +4,27 @@ import java.time.LocalDateTime;
 
 public class QuizResult {
     private Long id;
-    private Long user_id;
-    private Long quiz_id;
+    private Long userId;  // ← FIXED: Changed from user_id to userId for consistency
+    private Long quizId;  // ← FIXED: Changed from quiz_id to quizId for consistency
     private Integer score;
-    private Integer total_questions;
-    private LocalDateTime setSubmittedAt;
-    public QuizResult(){
+    private Integer totalQuestions;  // ← FIXED: Changed from total_questions
+    private LocalDateTime submittedAt;  // ← FIXED: Changed from setSubmittedAt
 
-    }
-    public LocalDateTime getSubmittedAt() {
-        return setSubmittedAt;
-    }
+    // No-arg constructor
+    public QuizResult() {}
 
-    public void setSubmittedAt(LocalDateTime setSubmittedAt) {
-        this.setSubmittedAt = setSubmittedAt;
-    }
-
-    public QuizResult(Long id, Long user_id, Long quiz_id, Integer score, Integer total_questions, LocalDateTime setSubmittedAt) {
+    // Full constructor
+    public QuizResult(Long id, Long userId, Long quizId, Integer score,
+                      Integer totalQuestions, LocalDateTime submittedAt) {
         this.id = id;
-        this.user_id = user_id;
-        this.quiz_id = quiz_id;
+        this.userId = userId;
+        this.quizId = quizId;
         this.score = score;
-        this.total_questions = total_questions;
-        this.setSubmittedAt= setSubmittedAt;
+        this.totalQuestions = totalQuestions;
+        this.submittedAt = submittedAt;
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -37,20 +33,20 @@ public class QuizResult {
         this.id = id;
     }
 
-    public Long getUser_id() {
-        return user_id;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUserId(Long user_id) {
-        this.user_id = user_id;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public Long getQuiz_id() {
-        return quiz_id;
+    public Long getQuizId() {
+        return quizId;
     }
 
-    public void setQuizId(Long quiz_id) {
-        this.quiz_id = quiz_id;
+    public void setQuizId(Long quizId) {
+        this.quizId = quizId;
     }
 
     public Integer getScore() {
@@ -61,23 +57,31 @@ public class QuizResult {
         this.score = score;
     }
 
-    public Integer getTotal_questions() {
-        return total_questions;
+    public Integer getTotalQuestions() {
+        return totalQuestions;
     }
 
-    public void setTotalQuestions(Integer total_questions) {
-        this.total_questions = total_questions;
+    public void setTotalQuestions(Integer totalQuestions) {
+        this.totalQuestions = totalQuestions;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
     }
 
     @Override
     public String toString() {
         return "QuizResult{" +
                 "id=" + id +
-                ", user_id=" + user_id +
-                ", quiz_id=" + quiz_id +
+                ", userId=" + userId +
+                ", quizId=" + quizId +
                 ", score=" + score +
-                ", total_questions=" + total_questions +
+                ", totalQuestions=" + totalQuestions +
+                ", submittedAt=" + submittedAt +
                 '}';
     }
 }
-

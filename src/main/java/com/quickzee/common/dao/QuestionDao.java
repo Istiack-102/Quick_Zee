@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuestionDao{
+public class QuestionDao {
 
     // Insert a new question into the database
     public void insert(Question question) throws SQLException {
@@ -16,7 +16,7 @@ public class QuestionDao{
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setLong(1, question.getId());
+            ps.setLong(1, question.getQuiz_id());  // ← FIXED: Was getId(), now getQuiz_id()
             ps.setInt(2, question.getOrdinal());
             ps.setString(3, question.getText());
 
@@ -25,7 +25,7 @@ public class QuestionDao{
             // Get the generated question ID and set it in the object
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
-                    question.setId(rs.getLong(1)); // Set generated ID
+                    question.setId(rs.getLong(1));
                 }
             }
         }
@@ -46,7 +46,7 @@ public class QuestionDao{
                 }
             }
         }
-        return null; // Return null if no question is found
+        return null;
     }
 
     // Find all questions for a specific quiz, ordered by ordinal
@@ -75,7 +75,7 @@ public class QuestionDao{
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, question.getId());
+            ps.setLong(1, question.getQuiz_id());  // ← FIXED: Was getId(), now getQuiz_id()
             ps.setInt(2, question.getOrdinal());
             ps.setString(3, question.getText());
             ps.setLong(4, question.getId());
@@ -100,7 +100,7 @@ public class QuestionDao{
     private Question mapRowToQuestion(ResultSet rs) throws SQLException {
         Question question = new Question();
         question.setId(rs.getLong("id"));
-        question.setId(rs.getLong("quiz_id"));
+        question.setQuiz_id(rs.getLong("quiz_id"));  // ← FIXED: Was setId(), now setQuiz_id()
         question.setOrdinal(rs.getInt("ordinal"));
         question.setText(rs.getString("text"));
         return question;
