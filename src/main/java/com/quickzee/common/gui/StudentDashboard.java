@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * StudentDashboard - Student main screen
+ * StudentDashboard - Student main screen (with Profile button)
  */
 public class StudentDashboard {
 
@@ -73,6 +73,32 @@ public class StudentDashboard {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        // Profile button (similar behaviour to Admin Dashboard)
+        Button profileButton = new Button("My Profile");
+        profileButton.setStyle(
+                "-fx-background-color: transparent;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-padding: 8 12;" +
+                        "-fx-cursor: hand;"
+        );
+        profileButton.setOnMouseEntered(e -> profileButton.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.12);" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-padding: 8 12;" +
+                        "-fx-cursor: hand;"
+        ));
+        profileButton.setOnMouseExited(e -> profileButton.setStyle(
+                "-fx-background-color: transparent;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-padding: 8 12;" +
+                        "-fx-cursor: hand;"
+        ));
+
+        profileButton.setOnAction(e -> showProfileView());
+
         Button logoutButton = new Button("Logout");
         logoutButton.setStyle(
                 "-fx-background-color: white;" +
@@ -86,7 +112,7 @@ public class StudentDashboard {
             QuickZeeApp.showLoginView();
         });
 
-        topBar.getChildren().addAll(titleLabel, spacer, logoutButton);
+        topBar.getChildren().addAll(titleLabel, spacer, profileButton, new Label("  "), logoutButton);
 
         return topBar;
     }
@@ -247,6 +273,35 @@ public class StudentDashboard {
         }
 
         return section;
+    }
+
+    /**
+     * Show profile dialog (similar to AdminDashboard.showProfileView)
+     */
+    private void showProfileView() {
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(20));
+
+        Label header = UIHelper.createHeaderLabel("My Profile");
+
+        VBox profileCard = UIHelper.createCard("Profile Information");
+        profileCard.setMaxWidth(500);
+
+        Label nameLabel = UIHelper.createLabel("Name: " + SessionManager.getLoggedInUserName());
+        Label emailLabel = UIHelper.createLabel("Email: " + SessionManager.getLoggedInUser().getEmail());
+        Integer sem = SessionManager.getLoggedInUserSemester();
+        Label semesterLabel = UIHelper.createLabel("Semester: " + (sem != null ? sem : "Not set"));
+        Label roleLabel = UIHelper.createLabel("Role: Student");
+
+        profileCard.getChildren().addAll(nameLabel, emailLabel, semesterLabel, roleLabel);
+        content.getChildren().addAll(header, profileCard);
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("My Profile");
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+        dialog.showAndWait();
     }
 
     public Scene getScene() {

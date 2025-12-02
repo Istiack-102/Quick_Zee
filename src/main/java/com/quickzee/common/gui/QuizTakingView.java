@@ -3,12 +3,12 @@ package com.quickzee.common.gui;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import com.quickzee.common.model.Quiz;
 import com.quickzee.common.model.Question;
@@ -18,39 +18,38 @@ import com.quickzee.common.service.AttemptService;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * QuizTakingView - Quiz taking interface WITH COUNTDOWN TIMER
- * Features:
+ * QuizTakingView - shows ALL questions serially in a scrollable view (one page)
+ * - Each question has its own ToggleGroup (independent selections)
  * - Real-time countdown timer
- * - Color-coded warnings (green → orange → red)
- * - Auto-disable options when time expires
- * - Auto-submit quiz
+ * - On expiry: everything is disabled/greyed out except the Submit button
+ * - Uses Platform.runLater for dialogs to avoid showAndWait during animation/layout pulses
  */
 public class QuizTakingView {
 
     private final Scene scene;
     private final AttemptService attemptService;
     private final Quiz quiz;
-    private final List<Long> selectedAnswers;
+    private final List<Long> selectedAnswers; // index -> optionId (null = unanswered)
 
-    private int currentQuestionIndex = 0;
     private int timeRemainingSeconds;
 
     // UI Components
     private Label timerLabel;
     private HBox timerPanel;
-    private Label questionLabel;
-    private VBox optionsBox;
-    private Button nextButton;
-    private Button prevButton;
+    private VBox questionsContainer; // holds all question cards
     private Button submitButton;
-    private List<RadioButton> currentRadioButtons;
-    private ToggleGroup toggleGroup;
 
     // Timer
     private Timeline countdown;
+
+    // Keep per-question toggleGroups and radio lists so we can disable them on expiry
+    private final Map<Integer, ToggleGroup> toggleGroups = new HashMap<>();
+    private final Map<Integer, List<RadioButton>> radioButtonsPerQuestion = new HashMap<>();
 
     public QuizTakingView(Long quizId) {
         this.attemptService = new AttemptService();
@@ -80,24 +79,27 @@ public class QuizTakingView {
         timerPanel = createTimerPanel();
         root.setTop(timerPanel);
 
-        // Question panel (CENTER)
-        VBox questionPanel = createQuestionPanel();
-        root.setCenter(questionPanel);
+        // Questions panel (CENTER) - show all questions serially
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        questionsContainer = new VBox(20);
+        questionsContainer.setPadding(new Insets(20));
+        questionsContainer.setAlignment(Pos.TOP_CENTER);
 
-        // Navigation panel (BOTTOM)
-        HBox navPanel = createNavigationPanel();
-        root.setBottom(navPanel);
+        buildAllQuestionCards();
 
-        // Load first question
-        loadQuestion(0);
+        scrollPane.setContent(questionsContainer);
+        root.setCenter(scrollPane);
+
+        // Bottom panel with submit
+        HBox bottom = createBottomPanel();
+        root.setBottom(bottom);
 
         // Start countdown timer
         startTimer();
 
         this.scene = new Scene(root, 900, 700);
     }
-
-    // ============ TIMER PANEL ============
 
     private HBox createTimerPanel() {
         HBox panel = new HBox();
@@ -109,11 +111,11 @@ public class QuizTakingView {
         );
 
         Label clockIcon = new Label("⏱");
-        clockIcon.setStyle("-fx-font-size: 32px; -fx-text-fill: white;");
+        clockIcon.setStyle("-fx-font-size: 24px; -fx-text-fill: white;");
 
         timerLabel = new Label();
         timerLabel.setStyle(
-                "-fx-font-size: 32px;" +
+                "-fx-font-size: 20px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-text-fill: white;"
         );
@@ -124,16 +126,78 @@ public class QuizTakingView {
         return panel;
     }
 
+    private HBox createBottomPanel() {
+        HBox panel = new HBox(15);
+        panel.setPadding(new Insets(15));
+        panel.setAlignment(Pos.CENTER_RIGHT);
+        panel.setStyle("-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1 0 0 0;");
+
+        submitButton = UIHelper.createSuccessButton("Submit Quiz");
+        submitButton.setPrefWidth(180);
+        submitButton.setOnAction(e -> handleSubmit());
+
+        panel.getChildren().add(submitButton);
+        return panel;
+    }
+
+    private void buildAllQuestionCards() {
+        questionsContainer.getChildren().clear();
+
+        List<Question> questions = quiz.getQuestions();
+
+        for (int i = 0; i < questions.size(); i++) {
+            Question q = questions.get(i);
+            VBox card = UIHelper.createCard(null);
+            card.setMaxWidth(800);
+
+            Label qLabel = new Label("Question " + (i + 1) + " of " + questions.size() + "\n\n" + q.getText());
+            qLabel.setWrapText(true);
+            qLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+            VBox opts = new VBox(10);
+            opts.setPadding(new Insets(10, 0, 0, 0));
+
+            ToggleGroup tg = new ToggleGroup();
+            toggleGroups.put(i, tg);
+
+            List<RadioButton> radios = new ArrayList<>();
+
+            for (Option opt : q.getOptions()) {
+                RadioButton rb = new RadioButton(opt.getText());
+                rb.setToggleGroup(tg);
+                rb.setUserData(opt.getId());
+                rb.setWrapText(true);
+                rb.setStyle("-fx-font-size: 14px;");
+
+                // restore previous selection if any
+                if (selectedAnswers.get(i) != null && selectedAnswers.get(i).equals(opt.getId())) {
+                    rb.setSelected(true);
+                }
+
+                final int questionIndex = i;
+                rb.setOnAction(ev -> selectedAnswers.set(questionIndex, (Long) rb.getUserData()));
+
+                radios.add(rb);
+                opts.getChildren().add(rb);
+            }
+
+            radioButtonsPerQuestion.put(i, radios);
+
+            card.getChildren().addAll(qLabel, new Separator(), opts);
+            questionsContainer.getChildren().add(card);
+        }
+
+    }
+
     private void startTimer() {
         countdown = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             timeRemainingSeconds--;
             updateTimerDisplay();
-
-            // Update colors based on time
             updateTimerColors();
 
-            // Check if time's up
             if (timeRemainingSeconds <= 0) {
+                // stop and perform expiry handling
+                countdown.stop();
                 handleTimeExpired();
             }
         }));
@@ -143,8 +207,8 @@ public class QuizTakingView {
     }
 
     private void updateTimerDisplay() {
-        int minutes = timeRemainingSeconds / 60;
-        int seconds = timeRemainingSeconds % 60;
+        int minutes = Math.max(0, timeRemainingSeconds) / 60;
+        int seconds = Math.max(0, timeRemainingSeconds) % 60;
         timerLabel.setText(String.format("Time Remaining: %02d:%02d", minutes, seconds));
     }
 
@@ -152,10 +216,7 @@ public class QuizTakingView {
         String bgColor;
 
         if (timeRemainingSeconds <= 60) {
-            // Last minute - RED
             bgColor = UIHelper.TIMER_CRITICAL;
-
-            // Flash effect
             if (timeRemainingSeconds <= 30 && timeRemainingSeconds % 2 == 0) {
                 timerPanel.setOpacity(0.7);
             } else {
@@ -163,12 +224,9 @@ public class QuizTakingView {
             }
 
         } else if (timeRemainingSeconds <= 300) {
-            // Last 5 minutes - ORANGE
             bgColor = UIHelper.TIMER_WARNING;
             timerPanel.setOpacity(1.0);
-
         } else {
-            // Normal - GREEN
             bgColor = UIHelper.TIMER_NORMAL;
             timerPanel.setOpacity(1.0);
         }
@@ -180,171 +238,37 @@ public class QuizTakingView {
     }
 
     private void handleTimeExpired() {
-        countdown.stop();
+        // Disable all interactive controls except submit
+        disableAllExceptSubmit();
 
-        // Disable all options
-        disableAllOptions();
+        // Show a non-blocking warning after current pulse
+        Platform.runLater(() -> UIHelper.showWarning("Time's Up!",
+                "The quiz time has expired. All controls are disabled. Please submit your quiz."));
 
-        // Show time's up dialog
-        UIHelper.showWarning("Time's Up!",
-                "The quiz time has expired. Your quiz will be auto-submitted.");
-
-        // Auto-submit
-        autoSubmitQuiz();
-    }
-
-    private void disableAllOptions() {
-        if (currentRadioButtons != null) {
-            for (RadioButton radio : currentRadioButtons) {
-                radio.setDisable(true);
-                radio.setStyle("-fx-opacity: 0.5;");
-            }
-        }
-
-        nextButton.setDisable(true);
-        prevButton.setDisable(true);
-    }
-
-    private void autoSubmitQuiz() {
-        try {
-            QuizResult result = attemptService.submitQuizAttempt(quiz.getId(), selectedAnswers);
-
-            countdown.stop();
-
-            UIHelper.showSuccess("Quiz Submitted",
-                    "Your quiz has been submitted successfully!");
-
-            QuickZeeApp.showResultView(result.getId(), result.getScore(), result.getTotalQuestions());
-
-        } catch (SQLException e) {
-            UIHelper.showError("Submission Error", e.getMessage());
-        }
-    }
-
-    // ============ QUESTION PANEL ============
-
-    private VBox createQuestionPanel() {
-        VBox panel = new VBox(20);
-        panel.setPadding(new Insets(30));
-        panel.setAlignment(Pos.TOP_CENTER);
-
-        // Question card
-        VBox questionCard = UIHelper.createCard(null);
-        questionCard.setMaxWidth(700);
-        questionCard.setMinHeight(400);
-
-        // Question number and text
-        questionLabel = new Label();
-        questionLabel.setWrapText(true);
-        questionLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
-        // Options container
-        optionsBox = new VBox(15);
-        optionsBox.setPadding(new Insets(20, 0, 0, 0));
-
-        questionCard.getChildren().addAll(questionLabel, new Separator(), optionsBox);
-        panel.getChildren().add(questionCard);
-
-        return panel;
-    }
-
-    private void loadQuestion(int index) {
-        currentQuestionIndex = index;
-        Question question = quiz.getQuestions().get(index);
-
-        // Update question label
-        questionLabel.setText("Question " + (index + 1) + " of " + quiz.getQuestions().size() +
-                "\n\n" + question.getText());
-
-        // Clear previous options
-        optionsBox.getChildren().clear();
-        currentRadioButtons = new ArrayList<>();
-        toggleGroup = new ToggleGroup();
-
-        // Create radio buttons for options
-        for (Option option : question.getOptions()) {
-            RadioButton radio = new RadioButton(option.getText());
-            radio.setToggleGroup(toggleGroup);
-            radio.setStyle("-fx-font-size: 16px;");
-            radio.setUserData(option.getId());
-
-            // Check if this option was previously selected
-            if (selectedAnswers.get(index) != null &&
-                    selectedAnswers.get(index).equals(option.getId())) {
-                radio.setSelected(true);
-            }
-
-            // Save selection
-            radio.setOnAction(e -> {
-                selectedAnswers.set(currentQuestionIndex, (Long) radio.getUserData());
-            });
-
-            currentRadioButtons.add(radio);
-            optionsBox.getChildren().add(radio);
-        }
-
-        // Update navigation buttons
-        prevButton.setDisable(index == 0);
-        nextButton.setText(index == quiz.getQuestions().size() - 1 ? "Review & Submit" : "Next");
-    }
-
-    // ============ NAVIGATION PANEL ============
-
-    private HBox createNavigationPanel() {
-        HBox panel = new HBox(15);
-        panel.setPadding(new Insets(20));
-        panel.setAlignment(Pos.CENTER);
-        panel.setStyle("-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1 0 0 0;");
-
-        prevButton = UIHelper.createButton("← Previous", "#757575");
-        prevButton.setPrefWidth(150);
-        prevButton.setOnAction(e -> {
-            if (currentQuestionIndex > 0) {
-                loadQuestion(currentQuestionIndex - 1);
-            }
+        // Ensure submit is visible and enabled for manual submission
+        Platform.runLater(() -> {
+            submitButton.setDisable(false);
+            submitButton.requestFocus();
         });
-
-        nextButton = UIHelper.createPrimaryButton("Next →");
-        nextButton.setPrefWidth(150);
-        nextButton.setOnAction(e -> {
-            if (currentQuestionIndex < quiz.getQuestions().size() - 1) {
-                loadQuestion(currentQuestionIndex + 1);
-            } else {
-                showReviewDialog();
-            }
-        });
-
-        submitButton = UIHelper.createSuccessButton("Submit Quiz");
-        submitButton.setPrefWidth(150);
-        submitButton.setVisible(false);
-        submitButton.setOnAction(e -> handleSubmit());
-
-        Region spacer1 = new Region();
-        Region spacer2 = new Region();
-        HBox.setHgrow(spacer1, Priority.ALWAYS);
-        HBox.setHgrow(spacer2, Priority.ALWAYS);
-
-        panel.getChildren().addAll(prevButton, spacer1, nextButton, spacer2, submitButton);
-
-        return panel;
     }
 
-    private void showReviewDialog() {
-        int answered = 0;
-        for (Long answer : selectedAnswers) {
-            if (answer != null) answered++;
+    private void disableAllExceptSubmit() {
+        // Disable all radio buttons and grey them
+        for (Map.Entry<Integer, List<RadioButton>> e : radioButtonsPerQuestion.entrySet()) {
+            for (RadioButton rb : e.getValue()) {
+                rb.setDisable(true);
+                rb.setStyle("-fx-opacity: 0.6;");
+            }
         }
 
-        int unanswered = quiz.getQuestions().size() - answered;
+        // You may also visually dim question cards
+        for (javafx.scene.Node node : questionsContainer.getChildren()) {
+            node.setOpacity(0.9);
+        }
 
-        String message = "Quiz Review:\n\n" +
-                "Total Questions: " + quiz.getQuestions().size() + "\n" +
-                "Answered: " + answered + "\n" +
-                "Unanswered: " + unanswered + "\n\n" +
-                "Are you sure you want to submit?";
-
-        if (UIHelper.showConfirmation("Review Quiz", message)) {
-            handleSubmit();
+        // Ensure submit button is visible and enabled (but leave its logic to handleSubmit)
+        if (submitButton != null) {
+            submitButton.setDisable(false);
         }
     }
 
@@ -352,14 +276,15 @@ public class QuizTakingView {
         try {
             QuizResult result = attemptService.submitQuizAttempt(quiz.getId(), selectedAnswers);
 
-            countdown.stop();
+            if (countdown != null) countdown.stop();
 
-            UIHelper.showSuccess("Quiz Submitted", "Your quiz has been submitted successfully!");
-
-            QuickZeeApp.showResultView(result.getId(), result.getScore(), result.getTotalQuestions());
+            Platform.runLater(() -> {
+                UIHelper.showSuccess("Quiz Submitted", "Your quiz has been submitted successfully!");
+                QuickZeeApp.showResultView(result.getId(), result.getScore(), result.getTotalQuestions());
+            });
 
         } catch (SQLException e) {
-            UIHelper.showError("Submission Error", e.getMessage());
+            Platform.runLater(() -> UIHelper.showError("Submission Error", e.getMessage()));
         }
     }
 

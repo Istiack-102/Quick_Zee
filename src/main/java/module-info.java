@@ -1,9 +1,14 @@
-module com.example.quick_zee {
+module com.quickzee.common {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.sql;
 
+    // --- Add this line ---
+    requires mysql.connector.j;
+    // ---------------------
 
-    opens com.example.quick_zee to javafx.fxml;
-    exports com.example.quick_zee;
+    exports com.quickzee.common.gui; // Assuming you fixed the previous error
+    opens com.quickzee.common.gui to javafx.fxml;
+    exports com.quickzee.common.util;
+    opens com.quickzee.common.model to javafx.base, javafx.fxml;
 }
