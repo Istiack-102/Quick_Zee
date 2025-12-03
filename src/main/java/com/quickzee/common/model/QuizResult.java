@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 
 public class QuizResult {
     private Long id;
-    private Long userId;  // ← FIXED: Changed from user_id to userId for consistency
-    private Long quizId;  // ← FIXED: Changed from quiz_id to quizId for consistency
+    private Long userId;
+    private Long quizId;
     private Integer score;
-    private Integer totalQuestions;  // ← FIXED: Changed from total_questions
-    private LocalDateTime submittedAt;  // ← FIXED: Changed from setSubmittedAt
+    private Integer totalQuestions;
+    private LocalDateTime submittedAt;
 
     // No-arg constructor
     public QuizResult() {}

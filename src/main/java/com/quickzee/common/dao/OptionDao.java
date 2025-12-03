@@ -17,9 +17,9 @@ public class OptionDao {
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setLong(1, option.getQuestion_id());
-            ps.setInt(2, option.getOrdinal());  // ← ADDED: Set ordinal
+            ps.setInt(2, option.getOrdinal());
             ps.setString(3, option.getText());
-            ps.setInt(4, option.getIs_correct());  // ← FIXED: Was setIs_correct(), now getIs_correct()
+            ps.setInt(4, option.getIs_correct());
 
             ps.executeUpdate();
 

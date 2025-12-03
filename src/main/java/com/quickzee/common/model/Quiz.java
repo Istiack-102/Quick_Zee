@@ -7,7 +7,7 @@ public class Quiz {
     private String title;
     private Integer semester;
     private Integer duration_minutes;
-    private List<Question> questions;  // ← ADDED: For loading full quiz with questions
+    private List<Question> questions;
 
     // No-arg constructor
     public Quiz() {}

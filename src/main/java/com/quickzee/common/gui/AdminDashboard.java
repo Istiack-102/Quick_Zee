@@ -57,7 +57,7 @@ public class AdminDashboard {
         this.scene = new Scene(mainLayout, 1200, 800);
     }
 
-    // ============ TOP BAR ============
+
 
     private HBox createTopBar() {
         HBox topBar = new HBox();
@@ -93,7 +93,7 @@ public class AdminDashboard {
         return topBar;
     }
 
-    // ============ SIDEBAR MENU ============
+
 
     private VBox createSidebar() {
         VBox sidebar = new VBox(5);
@@ -151,7 +151,7 @@ public class AdminDashboard {
         return button;
     }
 
-    // ============ DASHBOARD VIEW ============
+
 
     private void showDashboardView() {
         VBox content = new VBox(30);
@@ -235,7 +235,7 @@ public class AdminDashboard {
         return String.valueOf(total);
     }
 
-    // ============ CREATE QUIZ VIEW ============
+
 
     private void showCreateQuizView() {
         VBox content = new VBox(30);
@@ -317,7 +317,7 @@ public class AdminDashboard {
         mainLayout.setCenter(scrollPane);
     }
 
-    // ============ ADD QUESTIONS DIALOG ============
+
 
     private void showAddQuestionsDialog(Long quizId) {
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -494,7 +494,7 @@ public class AdminDashboard {
         }
     }
 
-    // ============ VIEW QUIZZES VIEW ============
+
 
     private void showViewQuizzesView() {
         VBox content = new VBox(30);
@@ -636,7 +636,7 @@ public class AdminDashboard {
         mainLayout.setCenter(scrollPane);
     }
 
-    // ============ QUIZ DETAILS DIALOG ============
+
 
     private void showQuizDetailsDialog(Long quizId) {
         try {
@@ -701,7 +701,7 @@ public class AdminDashboard {
         }
     }
 
-    // ============ PROFILE VIEW ============
+
 
     private void showProfileView() {
         VBox content = new VBox(30);
@@ -728,7 +728,7 @@ public class AdminDashboard {
         mainLayout.setCenter(scrollPane);
     }
 
-    // ============ EDIT QUIZ DIALOG ============
+
 
     private void showEditQuizDialog(Long quizId) {
         try {

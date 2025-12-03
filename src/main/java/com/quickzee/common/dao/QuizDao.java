@@ -66,9 +66,7 @@ public class QuizDao {
         }
     }
 
-    // ============================================================
-    //               Private helper methods
-    // ============================================================
+
 
     /**
      * Map one row from the quizzes table to a Quiz object (without questions).

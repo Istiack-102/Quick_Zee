@@ -149,7 +149,7 @@ public class ResultDao {
         return list;
     }
 
-    // ==================== Private helper methods ====================
+
 
     // Load all question IDs for a quiz, ordered by ordinal
     private List<Long> loadQuestionIdsForQuiz(Connection conn, long quizId) throws SQLException {

@@ -2,9 +2,9 @@ package com.quickzee.common.model;
 
 public class QuizResultAnswer {
     private Long id;
-    private Long resultId;  // ← FIXED: Changed from result_id
-    private Long questionId;  // ← FIXED: Changed from question_id
-    private Long selectedOptionId;  // ← FIXED: Changed from selected_option_id
+    private Long resultId;
+    private Long questionId;
+    private Long selectedOptionId;
 
     // No-arg constructor
     public QuizResultAnswer() {}

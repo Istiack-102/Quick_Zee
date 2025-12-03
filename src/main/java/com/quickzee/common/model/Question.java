@@ -7,7 +7,7 @@ public class Question {
     private Long quiz_id;
     private Integer ordinal;
     private String text;
-    private List<Option> options;  // ← ADDED: For loading question with its options
+    private List<Option> options;
 
     // No-arg constructor
     public Question() {}

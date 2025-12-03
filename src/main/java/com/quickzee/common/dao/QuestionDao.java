@@ -16,7 +16,7 @@ public class QuestionDao {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setLong(1, question.getQuiz_id());  // ← FIXED: Was getId(), now getQuiz_id()
+            ps.setLong(1, question.getQuiz_id());
             ps.setInt(2, question.getOrdinal());
             ps.setString(3, question.getText());
 

@@ -10,7 +10,6 @@ public class CLIHelper {
 
     private static final Scanner scanner = new Scanner(System.in);
 
-    // ========== INPUT METHODS ==========
 
     /**
      * Read a string input from user
@@ -107,7 +106,7 @@ public class CLIHelper {
         }
     }
 
-    // ========== DISPLAY METHODS ==========
+    // Display Method
 
     /**
      * Print a header with title

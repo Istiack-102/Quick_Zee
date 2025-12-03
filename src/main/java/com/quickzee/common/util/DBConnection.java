@@ -13,7 +13,7 @@ public class DBConnection {
     // Database credentials - CHANGE THESE TO MATCH YOUR SETUP
     private static final String URL = "jdbc:mysql://localhost:3306/Quick_Zee";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "mnbvcxzmn";  // ← CHANGE THIS!
+    private static final String PASSWORD = "istiack123@";  // ← CHANGE THIS!
 
     // JDBC Driver class name
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
