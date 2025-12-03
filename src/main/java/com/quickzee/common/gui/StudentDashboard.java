@@ -13,6 +13,7 @@ import com.quickzee.common.service.AttemptService;
 import com.quickzee.common.util.SessionManager;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -130,7 +131,7 @@ public class StudentDashboard {
         }
 
         try {
-            List<Quiz> quizzes = quizService.getQuizzesBySemester(semester);
+            List<Quiz> quizzes = getQuizzesForStudent(semester);
 
             if (quizzes.isEmpty()) {
                 Label noQuizzesLabel = UIHelper.createLabel("No quizzes available for your semester");
@@ -147,6 +148,23 @@ public class StudentDashboard {
                 titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
                 titleCol.setPrefWidth(300);
 
+                TableColumn<Quiz, Integer> semesterCol = new TableColumn<>("Semester");
+                semesterCol.setCellValueFactory(new PropertyValueFactory<>("semester"));
+                semesterCol.setPrefWidth(100);
+                semesterCol.setCellFactory(column -> new TableCell<>() {
+                    @Override
+                    protected void updateItem(Integer item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty || item == null) {
+                            setText(null);
+                        } else if (item == 0) {
+                            setText("All");
+                        } else {
+                            setText(item.toString());
+                        }
+                    }
+                });
+
                 TableColumn<Quiz, Integer> durationCol = new TableColumn<>("Duration (min)");
                 durationCol.setCellValueFactory(new PropertyValueFactory<>("duration_minutes"));
                 durationCol.setPrefWidth(120);
@@ -154,7 +172,7 @@ public class StudentDashboard {
                 TableColumn<Quiz, Void> actionCol = new TableColumn<>("Action");
                 actionCol.setPrefWidth(100);
                 actionCol.setCellFactory(param -> new TableCell<>() {
-                    private final Button takeButton = UIHelper.createSuccessButton("Take Quiz");
+                    private final Button takeButton = UIHelper.createSuccessButton("Start");
 
                     {
                         takeButton.setOnAction(e -> {
@@ -174,7 +192,7 @@ public class StudentDashboard {
                     }
                 });
 
-                table.getColumns().addAll(idCol, titleCol, durationCol, actionCol);
+                table.getColumns().addAll(idCol, titleCol, semesterCol, durationCol, actionCol);
                 table.getItems().addAll(quizzes);
 
                 section.getChildren().add(table);
@@ -186,6 +204,20 @@ public class StudentDashboard {
         }
 
         return section;
+    }
+
+    private List<Quiz> getQuizzesForStudent(int semester) throws SQLException {
+        List<Quiz> allQuizzes = new ArrayList<>();
+
+        // Get quizzes for student's specific semester
+        List<Quiz> semesterQuizzes = quizService.getQuizzesBySemester(semester);
+        allQuizzes.addAll(semesterQuizzes);
+
+        // Get quizzes for "all semesters" (semester = 0)
+        List<Quiz> allSemesterQuizzes = quizService.getQuizzesBySemester(0);
+        allQuizzes.addAll(allSemesterQuizzes);
+
+        return allQuizzes;
     }
 
     private VBox createHistorySection() {

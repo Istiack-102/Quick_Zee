@@ -53,8 +53,8 @@ public class QuizService {
             throw new IllegalArgumentException("Quiz title must be between 3 and 255 characters");
         }
 
-        if (semester != null && !InputValidator.isValidSemester(semester)) {
-            throw new IllegalArgumentException("Semester must be between 1 and 8");
+        if (semester != null && semester != 0 && !InputValidator.isValidSemester(semester)) {
+            throw new IllegalArgumentException("Semester must be between 1 and 8, or 0 for all semesters");
         }
 
         if (durationMinutes == null || !InputValidator.isValidDuration(durationMinutes)) {

@@ -17,10 +17,7 @@ import com.quickzee.common.model.QuizResult;
 import com.quickzee.common.service.AttemptService;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * QuizTakingView - shows ALL questions serially in a scrollable view (one page)
@@ -58,7 +55,14 @@ public class QuizTakingView {
         // Load quiz
         try {
             this.quiz = attemptService.startQuizAttempt(quizId);
-
+            // Randomize Questions
+            Collections.shuffle(quiz.getQuestions());
+            // Randomize Options
+            for (Question question : quiz.getQuestions()) {
+                if (question.getOptions() != null) {
+                    Collections.shuffle(question.getOptions());
+                }
+            }
             // Initialize answers list (null = unanswered)
             for (int i = 0; i < quiz.getQuestions().size(); i++) {
                 selectedAnswers.add(null);

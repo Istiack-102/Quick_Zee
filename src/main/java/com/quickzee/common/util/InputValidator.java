@@ -118,7 +118,7 @@ public class InputValidator {
      * @return true if valid (1-8), false otherwise
      */
     public static boolean isValidSemester(Integer semester) {
-        return semester != null && semester >= 1 && semester <= 8;
+        return semester != null && semester >= 0 && semester <= 8;
     }
 
     /**

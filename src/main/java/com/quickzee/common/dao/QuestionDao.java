@@ -70,15 +70,14 @@ public class QuestionDao {
 
     // Update an existing question
     public void update(Question question) throws SQLException {
-        String sql = "UPDATE questions SET quiz_id = ?, ordinal = ?, text = ? WHERE id = ?";
+        String sql = "UPDATE questions SET text = ?, ordinal = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, question.getQuiz_id());  // ← FIXED: Was getId(), now getQuiz_id()
+            ps.setString(1, question.getText());
             ps.setInt(2, question.getOrdinal());
-            ps.setString(3, question.getText());
-            ps.setLong(4, question.getId());
+            ps.setLong(3, question.getId());
 
             ps.executeUpdate();
         }

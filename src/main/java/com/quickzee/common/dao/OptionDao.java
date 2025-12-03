@@ -71,16 +71,14 @@ public class OptionDao {
 
     // Update an existing option
     public void update(Option option) throws SQLException {
-        String sql = "UPDATE options SET question_id = ?, ordinal = ?, text = ?, is_correct = ? WHERE id = ?";
+        String sql = "UPDATE options SET text = ?, is_correct = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, option.getQuestion_id());
-            ps.setInt(2, option.getOrdinal());  // ← ADDED: Set ordinal
-            ps.setString(3, option.getText());
-            ps.setInt(4, option.getIs_correct());  // ← FIXED: Was setIs_correct(), now getIs_correct()
-            ps.setLong(5, option.getId());
+            ps.setString(1, option.getText());
+            ps.setInt(2, option.getIs_correct());
+            ps.setLong(3, option.getId());
 
             ps.executeUpdate();
         }
