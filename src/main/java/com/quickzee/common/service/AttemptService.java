@@ -144,16 +144,15 @@ public class AttemptService {
      * @return Grade string (A+, A, B+, etc.)
      */
     public String getGrade(double percentage) {
-        if (percentage >= 90) return "A+";
-        if (percentage >= 85) return "A";
-        if (percentage >= 80) return "A-";
-        if (percentage >= 75) return "B+";
-        if (percentage >= 70) return "B";
-        if (percentage >= 65) return "B-";
-        if (percentage >= 60) return "C+";
-        if (percentage >= 55) return "C";
-        if (percentage >= 50) return "C-";
-        if (percentage >= 45) return "D";
+        if (percentage >= 80) return "A+";
+        if (percentage >= 75) return "A";
+        if (percentage >= 70) return "A-";
+        if (percentage >= 65) return "B+";
+        if (percentage >= 60) return "B";
+        if (percentage >= 55) return "B-";
+        if (percentage >= 50) return "C+";
+        if (percentage >= 45) return "C";
+        if (percentage >= 40) return "D";
         return "F";
     }
 
@@ -163,7 +162,7 @@ public class AttemptService {
      * @return true if passed, false otherwise
      */
     public boolean isPassed(QuizResult result) {
-        return calculatePercentage(result) >= 50.0;
+        return calculatePercentage(result) >= 40.0;
     }
 
     /**
