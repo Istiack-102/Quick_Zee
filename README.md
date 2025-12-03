@@ -1,6 +1,4 @@
-# 📘 Quick_Zee - Quiz Management System
-
-## Complete Project README
+# 📘 QuickZee - Your Quick Quiz Hub
 
 ---
 
@@ -28,7 +26,7 @@
 
 ## 🎯 Project Overview
 
-**Quick_Zee** is a comprehensive offline quiz management system designed for educational institutions. It provides a complete solution for creating, managing, and taking quizzes with real-time scoring and performance tracking.
+**QuickZee** is a comprehensive offline quiz management system designed for educational institutions. It provides a complete solution for creating, managing, and taking quizzes with real-time scoring and performance tracking.
 
 ### Key Highlights:
 - 🎓 **Dual Interface**: Command-Line Interface (CLI) and JavaFX Graphical User Interface (GUI)
